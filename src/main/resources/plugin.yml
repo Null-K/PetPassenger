@@ -1,0 +1,26 @@
+main: com.puddingkc.PetPassenger
+name: PetPassenger
+version: 1.0.3
+api-version: "1.16"
+author: "PuddingKC"
+permissions:
+  petpassenger.use:
+    default: op
+  petpassenger.bypass:
+    default: op
+  petpassenger.toggle:
+    default: op
+  petpassenger.reload:
+    default: op
+commands:
+  petpassenger:
+    permission: petpassenger.reload
+    aliases:
+      - "pp"
+  petToggle:
+    permission: petpassenger.toggle
+    aliases:
+      - "pt"
+softdepend:
+  - "Residence"
+  - "PlaceholderAPI"

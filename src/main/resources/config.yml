@@ -1,0 +1,28 @@
+# 是否启用 petpassenger.use 权限检测
+check-permissions: true
+
+# 是否默认启用举起功能
+default-enabled: true
+
+# 启用的世界，填 all 表示全部
+enabled-worlds:
+  - "world"
+  - "test"
+
+# 提示文本
+messages:
+  reload-success: "&f配置文件重载完成 :D"
+  enabled: "&7已 &a开启 &7举起动物功能"
+  disabled: "&7已 &c关闭 &7举起动物功能"
+
+# 允许顶在头上的动物，填写 animals 代表所有动物（animals 全小写）
+allowed-animals:
+  - "COW"
+  - "SHEEP"
+  - "PIG"
+  - "CHICKEN"
+  - "HORSE"
+  - "DONKEY"
+  - "MULE"
+  - "LLAMA"
+  - "PARROT"
