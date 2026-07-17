@@ -14,18 +14,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
 public class PetPassenger extends JavaPlugin implements Listener {
 
     private final Set<UUID> enabledPlayers = new HashSet<>();
+    private final Map<UUID, Long> lastSneakTime = new HashMap<>();
 
     private List<String> allowedAnimals;
     private List<String> enabledWorlds;
@@ -33,6 +37,10 @@ public class PetPassenger extends JavaPlugin implements Listener {
     private boolean defaultEnabled;
     private boolean blacklistMode;
     private boolean passengerFallDamage;
+    private boolean throwEnabled;
+    private double throwPower;
+    private double throwUpPower;
+    private long doubleSneakInterval;
     private Residence residence;
 
     @Override
@@ -59,6 +67,10 @@ public class PetPassenger extends JavaPlugin implements Listener {
         checkPermissions = getConfig().getBoolean("check-permissions");
         blacklistMode = getConfig().getString("list-mode", "whitelist").equalsIgnoreCase("blacklist");
         passengerFallDamage = getConfig().getBoolean("passenger-fall-damage", false);
+        throwEnabled = getConfig().getBoolean("throw-enabled", false);
+        throwPower = getConfig().getDouble("throw-power", 1.5);
+        throwUpPower = getConfig().getDouble("throw-up-power", 0.4);
+        doubleSneakInterval = getConfig().getLong("double-sneak-interval", 400);
         residence = (Residence) Bukkit.getPluginManager().getPlugin("Residence");
         defaultEnabled = getConfig().getBoolean("default-enabled");
     }
@@ -140,15 +152,52 @@ public class PetPassenger extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerSneak(PlayerToggleSneakEvent event) {
+        if (!event.isSneaking()) { return; }
+
         Player player = event.getPlayer();
-        if (!player.isSneaking()) {
+        if (player.getPassengers().isEmpty()) {
+            lastSneakTime.remove(player.getUniqueId());
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        Long last = lastSneakTime.get(player.getUniqueId());
+        if (last != null && now - last <= doubleSneakInterval) {
             player.getPassengers().forEach(player::removePassenger);
+            lastSneakTime.remove(player.getUniqueId());
+        } else {
+            lastSneakTime.put(player.getUniqueId(), now);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerAnimation(PlayerAnimationEvent event) {
+        if (!throwEnabled) { return; }
+        if (event.getAnimationType() != PlayerAnimationType.ARM_SWING) { return; }
+
+        Player player = event.getPlayer();
+        if (!player.isSneaking()) { return; }
+        if (player.getPassengers().isEmpty()) { return; }
+
+        List<Entity> passengers = new ArrayList<>(player.getPassengers());
+        Vector velocity = player.getLocation().getDirection().normalize().multiply(throwPower);
+        velocity.setY(velocity.getY() + throwUpPower);
+
+        for (Entity passenger : passengers) {
+            player.removePassenger(passenger);
+            passenger.setVelocity(velocity);
+        }
+
+        String message = getMessages("thrown");
+        if (!message.isEmpty()) {
+            player.sendMessage(message);
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         event.getPlayer().getPassengers().forEach(event.getPlayer()::removePassenger);
+        lastSneakTime.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

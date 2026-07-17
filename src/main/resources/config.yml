@@ -14,9 +14,22 @@ messages:
   reload-success: "&f配置文件重载完成 :D"
   enabled: "&7已 &a开启 &7举起动物功能"
   disabled: "&7已 &c关闭 &7举起动物功能"
+  thrown: "&7你把生物 &e丢出去 &7了"
 
 # 被举起的生物是否受到摔落伤害
 passenger-fall-damage: false
+
+# 举起生物后，保持潜行并左键攻击可以把生物丢出去
+# 是否启用丢出功能
+throw-enabled: false
+# 丢出的力度（水平方向），数值越大丢得越远
+throw-power: 1.5
+# 丢出时额外的向上抛力，让生物飞出抛物线
+throw-up-power: 0.4
+
+# 双击潜行放下生物的判定间隔（毫秒）
+# 在这个时间内连续按两次潜行才会放下生物，数值越小要求手速越快
+double-sneak-interval: 400
 
 # 动物列表模式
 # whitelist 白名单，只有列表里的能被举起
