@@ -13,6 +13,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -30,6 +31,8 @@ public class PetPassenger extends JavaPlugin implements Listener {
     private List<String> enabledWorlds;
     private boolean checkPermissions;
     private boolean defaultEnabled;
+    private boolean blacklistMode;
+    private boolean passengerFallDamage;
     private Residence residence;
 
     @Override
@@ -54,6 +57,8 @@ public class PetPassenger extends JavaPlugin implements Listener {
         allowedAnimals = getConfig().getStringList("allowed-animals");
         enabledWorlds = getConfig().getStringList("enabled-worlds");
         checkPermissions = getConfig().getBoolean("check-permissions");
+        blacklistMode = getConfig().getString("list-mode", "whitelist").equalsIgnoreCase("blacklist");
+        passengerFallDamage = getConfig().getBoolean("passenger-fall-damage", false);
         residence = (Residence) Bukkit.getPluginManager().getPlugin("Residence");
         defaultEnabled = getConfig().getBoolean("default-enabled");
     }
@@ -64,7 +69,13 @@ public class PetPassenger extends JavaPlugin implements Listener {
     }
 
     private boolean isAllowedAnimals(Entity entity) {
-        if (allowedAnimals.contains(entity.getType().name()) && entity.getType() != EntityType.PLAYER) { return true; }
+        if (entity.getType() == EntityType.PLAYER) { return false; }
+
+        if (blacklistMode) {
+            return !allowedAnimals.contains(entity.getType().name());
+        }
+
+        if (allowedAnimals.contains(entity.getType().name())) { return true; }
 
         if (allowedAnimals.contains("animals")) {
             return entity instanceof Animals;
@@ -138,5 +149,14 @@ public class PetPassenger extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         event.getPlayer().getPassengers().forEach(event.getPlayer()::removePassenger);
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (passengerFallDamage) { return; }
+        if (event.getCause() != EntityDamageEvent.DamageCause.FALL) { return; }
+        if (event.getEntity().getVehicle() instanceof Player) {
+            event.setCancelled(true);
+        }
     }
 }

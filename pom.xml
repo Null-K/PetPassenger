@@ -38,5 +38,12 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.bekvon.bukkit</groupId>
+            <artifactId>residence</artifactId>
+            <version>6.0.2.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/Residence6.0.2.4.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

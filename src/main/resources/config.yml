@@ -15,7 +15,17 @@ messages:
   enabled: "&7已 &a开启 &7举起动物功能"
   disabled: "&7已 &c关闭 &7举起动物功能"
 
-# 允许顶在头上的动物，填写 animals 代表所有动物（animals 全小写）
+# 被举起的生物是否受到摔落伤害
+passenger-fall-damage: false
+
+# 动物列表模式
+# whitelist 白名单，只有列表里的能被举起
+# blacklist 黑名单，列表里的不能被举起
+list-mode: "whitelist"
+
+# 允许顶在头上的动物
+# 白名单模式下，填写 animals 代表所有动物（animals 全小写）
+# 黑名单模式下，填写的动物不能被举起
 allowed-animals:
   - "COW"
   - "SHEEP"
